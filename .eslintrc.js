@@ -2,9 +2,11 @@ module.exports = {
   env: {
     browser: true,
     commonjs: true,
-    es2021: true
+    es2021: true,
+    mocha: true,
+    node: true
   },
-  "standard": {"env":["mocha"]},
+
   globals: {
     supertest: true,
     expect: true,

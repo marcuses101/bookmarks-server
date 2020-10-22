@@ -13,7 +13,7 @@ bookmarksRouter
   })
   .post(bodyParser, (req, res) => {
     const id = uuid();
-    const { title, url, rating, desc } = req.body;
+    const { title, url, rating, description } = req.body;
 
     if (!title) {
       logger.error(`${req.method} ${req.path} Title is required`);
@@ -27,11 +27,11 @@ bookmarksRouter
       logger.error(`${req.method} ${req.path} rating is required`);
       return res.status(400).send("Invalid Data");
     }
-    if (!desc) {
+    if (!description) {
       logger.error(`${req.method} ${req.path} description is required`);
       return res.status(400).send("Invalid Data");
     }
-    const bookmark = { id, title, url, rating, desc };
+    const bookmark = { id, title, url, rating, description };
     bookmarks.push(bookmark);
     res.json(bookmark);
   });
@@ -52,7 +52,7 @@ bookmarksRouter
     if (bookmarkIndex === -1) return res.status(404).send("Not Found");
 
     const bookmark = bookmarks.splice(bookmarkIndex, 1);
-    
+
     res.status(200).json(bookmark[0])
   });
 
