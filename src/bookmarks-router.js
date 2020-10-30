@@ -1,15 +1,18 @@
 const express = require("express");
 const logger = require("./logger");
 const { v4: uuid } = require("uuid");
-const { bookmarks } = require("./store");
+const BookmarksService = require('./BookmarksService')
+const bookmarks = [];
 
 const bookmarksRouter = express.Router();
 const bodyParser = express.json();
 
 bookmarksRouter
   .route("/bookmarks")
-  .get((req, res) => {
-    res.json(bookmarks);
+  .get(async(req, res) => {
+    const db = req.app.get('db');
+    const allBookmarks = await BookmarksService.getBookmarks(db);
+    res.json(allBookmarks);
   })
   .post(bodyParser, (req, res) => {
     const id = uuid();
@@ -38,11 +41,11 @@ bookmarksRouter
 
 bookmarksRouter
   .route("/bookmarks/:id")
-  .get((req, res) => {
+  .get(async (req, res) => {
     const { id } = req.params;
-    const bookmark = bookmarks.find((b) => b.id == id);
+    const db = req.app.get('db')
+    const bookmark = await BookmarksService.getBookmarkById(db,id);
     if (!bookmark) return res.status(404).json({ error: "Not Found" });
-
     res.json(bookmark);
   })
 
