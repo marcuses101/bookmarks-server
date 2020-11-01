@@ -26,7 +26,7 @@ bookmarksRouter
   .post(bodyParser, async (req, res) => {
     const db = req.app.get("db");
     const { title, url, rating, description } = req.body;
-    const bookmark = { title, url, rating, description };
+    const bookmark = sanitizeBookmark({ title, url, rating, description });
     if (!["1","2","3","4","5"].includes(rating)) return res.status(400).send('invalid rating')
     for (const [key, value] of Object.entries(bookmark)) {
       if (!value) {
