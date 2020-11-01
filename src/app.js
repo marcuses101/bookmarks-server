@@ -14,6 +14,7 @@ const morganOption = NODE_ENV === "production" ? "tiny" : "dev";
 app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
+app.use(express.json())
 
 app.use((req,res,next)=>{
   if(!req.headers.authorization || req.headers.authorization.split(" ")[1] !== API_KEY){
@@ -23,7 +24,7 @@ app.use((req,res,next)=>{
   next();
 })
 
-app.use(bookmarksRouter);
+app.use("/bookmarks",bookmarksRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello, world!");

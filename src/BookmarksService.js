@@ -9,15 +9,30 @@ const BookmarksService = {
     .where({id})
     .first();
   },
-  createBookmark(knex, bookmark){
-    return Promise.resolve('new bookmark created')
+  async createBookmark(knex, bookmark){
+    const rows = await knex
+    .insert(bookmark)
+    .into('bookmarks')
+    .returning('*');
+    return rows[rows.length - 1]
   },
-  updateBookmark(knex, id, bookmark){
+  async updateBookmark(knex, id, bookmark){
+    console.log(bookmark)
+    await knex('bookmarks')
+    .where({id})
+    .update({
+      title: bookmark.title,
+      url: bookmark.url,
+      description: bookmark.description,
+      rating: bookmark.rating
+    })
     return Promise.resolve('updated bookmark')
   },
-  deleteBookmark(knex, id){
-    return Promise.resolve('deleted bookmark')
-  },
+  deleteBookmark(knex,id){
+    return knex('bookmarks')
+    .where({id})
+    .delete();
+  }
 }
 
 module.exports = BookmarksService

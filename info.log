@@ -28,3 +28,12 @@
 {"message":"Unauthorized request to path: /bookmarks","level":"error"}
 {"message":"Unauthorized request to path: /bookmarks/2","level":"error"}
 {"message":"Unauthorized request to path: /bookmarks","level":"error"}
+{"message":"/ rating is required","level":"error"}
+{"message":"/ rating is required","level":"error"}
+{"expose":true,"statusCode":400,"status":400,"body":"  {\n    \"title\": \"My website\",\n    \"url\": \"http://www.marcus-connolly.com\",\n    \"rating\": \"5\",\n    \"description\": \"This is my website\"\n  }\n\nPOST http://localhost:8000/bookmarks HTTP/1.1\nContent-Type: application/json\nAuthorization: Bearer 2fc6f6ac-c54e-4dd7-8ce5-8ee662038da9\n\n  {\n    \"title\": \"My website\",\n    \"url\": \"http://www.marcus-connolly.com\",\n    \"rating\": \"5\",\n    \"description\": \"This is my website\"\n  }","type":"entity.parse.failed","level":"error"}
+{"expose":true,"statusCode":400,"status":400,"body":"  {\n    \"title\": \"My website\",\n    \"url\": \"http://www.marcus-connolly.com\",\n    \"rating\": \"5\",\n    \"description\": \"This is my website\"\n  }\n\nPOST http://localhost:8000/bookmarks HTTP/1.1\nContent-Type: application/json\nAuthorization: Bearer 2fc6f6ac-c54e-4dd7-8ce5-8ee662038da9\n\n  {\n    \"title\": \"My website\",\n    \"url\": \"http://www.marcus-connolly.com\",\n    \"rating\": \"5\",\n    \"description\": \"This is my website\"\n  }","type":"entity.parse.failed","level":"error"}
+{"message":"Unauthorized request to path: /bookmarks/2","level":"error"}
+{"message":"Unauthorized request to path: /bookmarks","level":"error"}
+{"message":"Unauthorized request to path: /articles/911","level":"error"}
+{"message":"Unauthorized request to path: /articles/911","level":"error"}
+{"message":"Unauthorized request to path: /articles/911","level":"error"}

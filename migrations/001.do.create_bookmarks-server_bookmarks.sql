@@ -1,5 +1,5 @@
 CREATE TYPE stars AS ENUM (
-  '0','1','2','3','4','5'
+  '1','2','3','4','5'
 );
 
 CREATE TABLE bookmarks (
