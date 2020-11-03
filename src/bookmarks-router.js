@@ -6,13 +6,13 @@ const xss = require("xss");
 const bookmarksRouter = express.Router();
 const bodyParser = express.json();
 
-function sanitizeBookmark(bookmark){
+function sanitizeBookmark(bookmark) {
   return {
     ...bookmark,
     title: xss(bookmark.title),
     url: xss(bookmark.url),
     description: xss(bookmark.description),
-  }
+  };
 }
 
 bookmarksRouter
@@ -20,14 +20,17 @@ bookmarksRouter
   .get(async (req, res) => {
     const db = req.app.get("db");
     const allBookmarks = await BookmarksService.getBookmarks(db);
-    const sanitizedBookmarks = allBookmarks.map(bookmark=>sanitizeBookmark(bookmark))
+    const sanitizedBookmarks = allBookmarks.map((bookmark) =>
+      sanitizeBookmark(bookmark)
+    );
     res.json(sanitizedBookmarks);
   })
   .post(bodyParser, async (req, res) => {
     const db = req.app.get("db");
     const { title, url, rating, description } = req.body;
     const bookmark = sanitizeBookmark({ title, url, rating, description });
-    if (!["1","2","3","4","5"].includes(rating)) return res.status(400).send('invalid rating')
+    if (!["1", "2", "3", "4", "5"].includes(rating))
+      return res.status(400).send("invalid rating");
     for (const [key, value] of Object.entries(bookmark)) {
       if (!value) {
         logger.error(`${req.path} ${key} is required`);
@@ -35,7 +38,7 @@ bookmarksRouter
       }
     }
     const newEntry = await BookmarksService.createBookmark(db, bookmark);
-    res.status(201).json(newEntry);
+    res.location(`/api/bookmarks/${newEntry.id}`).status(201).json(newEntry);
   });
 
 bookmarksRouter
@@ -47,6 +50,15 @@ bookmarksRouter
     if (!bookmark) return res.status(404).json({ error: "Not Found" });
     req.bookmark = sanitizeBookmark(bookmark);
     next();
+  })
+  .patch(async (req, res) => {
+    const db = req.app.get("db");
+    const { title, description, url, rating } = req.body;
+    const newBookmark = { title, description, url, rating };
+    if (!Object.values(newBookmark).some((value) => value))
+      return res.status(400).end();
+    await BookmarksService.updateBookmark(db, req.bookmark.id, newBookmark);
+    res.status(204).send("bookmark updated");
   })
   .get(async (req, res) => {
     res.json(req.bookmark);

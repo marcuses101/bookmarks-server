@@ -34,7 +34,7 @@ describe("Bookmarks-server", () => {
       .expect(200, "Hello, world!");
   });
 
-  describe("/bookmarks route", () => {
+  describe("/api/bookmarks route", () => {
     context(`'bookmarks' table contains data`, () => {
       beforeEach(`insert data in to the 'bookmarks' table`, () => {
         return db.into("bookmarks").insert(bookmarks);
@@ -46,7 +46,7 @@ describe("Bookmarks-server", () => {
 
       it("GET responds with 200 containing an array of all bookmarks", () => {
         return supertest(app)
-          .get("/bookmarks")
+          .get("/api/bookmarks")
           .set("Authorization", auth)
           .expect(200)
           .expect("Content-Type", /json/)
@@ -61,29 +61,29 @@ describe("Bookmarks-server", () => {
 
       it("GET responds with 200 and an empty array", () => {
         return supertest(app)
-          .get("/bookmarks")
+          .get("/api/bookmarks")
           .set("Authorization", auth)
           .expect(200, []);
       });
 
-      const bookmarkKeys = ['title', 'url', 'description', 'rating']
-      bookmarkKeys.forEach(key=>{
+      const bookmarkKeys = ["title", "url", "description", "rating"];
+      bookmarkKeys.forEach((key) => {
         const sampleBookmark = {
-          title:"test title",
-          url: 'test url',
-          description: 'test description',
-          rating: 'test rating'
-        }
-        delete sampleBookmark[key]
+          title: "test title",
+          url: "test url",
+          description: "test description",
+          rating: "test rating",
+        };
+        delete sampleBookmark[key];
 
-        it(`POST responds with 400 status if ${key} is missing`,()=>{
+        it(`POST responds with 400 status if ${key} is missing`, () => {
           return supertest(app)
-          .post('/bookmarks')
-          .set("Authorization", auth)
-          .send(sampleBookmark)
-          .expect(400);
-        })
-      })
+            .post("/api/bookmarks")
+            .set("Authorization", auth)
+            .send(sampleBookmark)
+            .expect(400);
+        });
+      });
 
       it("POST responds with 201 and the created object", () => {
         const newBookmark = {
@@ -93,15 +93,18 @@ describe("Bookmarks-server", () => {
           rating: "5",
         };
         return supertest(app)
-          .post("/bookmarks")
+          .post("/api/bookmarks")
           .set("Authorization", auth)
           .send(newBookmark)
           .expect(201)
-          .then((res) => expect(res.body).to.eql({ ...newBookmark, id: 1 }));
+          .then((res) => {
+            expect(res.body).to.eql({ ...newBookmark, id: 1 })
+            expect(res.headers.location).to.eql(`/api/bookmarks/1`)
+          });
       });
     });
   });
-  describe("/bookmarks/:id route", () => {
+  describe("/api/bookmarks/:id route", () => {
     context(`'bookmarks' table contains data`, () => {
       beforeEach(`insert data in to the 'bookmarks' table`, () => {
         return db.into("bookmarks").insert(bookmarks);
@@ -113,7 +116,7 @@ describe("Bookmarks-server", () => {
 
       it("GET returns the appropriate bookmark", () => {
         return supertest(app)
-          .get("/bookmarks/0")
+          .get("/api/bookmarks/0")
           .set("Authorization", auth)
           .expect(200)
           .then((res) =>
@@ -125,19 +128,48 @@ describe("Bookmarks-server", () => {
 
       it("PUT responds with 202 containing the updated bookmark", () => {
         return supertest(app)
-          .put("/bookmarks/2")
+          .put("/api/bookmarks/2")
           .set("Authorization", auth)
           .set("Content-Type", "application/json")
           .send({ ...bookmarks[0] })
           .expect(202)
           .then(() => {
             return supertest(app)
-              .get("/bookmarks/2")
+              .get("/api/bookmarks/2")
               .set("Authorization", auth)
               .then((res) =>
                 expect(res.body).to.eql({ ...bookmarks[0], id: 2 })
               );
           });
+      });
+
+      it(`PATCH responds with 204 and no content when successful, article in question is updated`, () => {
+        const bookmarkId = 0;
+        const newTitle = { title: "New Title" };
+        const expectedBookmark = {
+          ...bookmarks.find((bookmark) => bookmark.id == bookmarkId),
+          ...newTitle
+        };
+        return supertest(app)
+          .patch(`/api/bookmarks/${bookmarkId}`)
+          .set("Authorization", auth)
+          .send(newTitle)
+          .expect(204)
+          .then(() => {
+            return supertest(app)
+              .get(`/api/bookmarks/${bookmarkId}`)
+              .set("Authorization", auth)
+              .then(res=>expect(res.body).to.eql(expectedBookmark));
+          });
+      });
+
+      it("PATCH responds with 400 when no values are supplied for any field", () => {
+        const bookmarkId = 0
+        return supertest(app)
+        .patch(`/api/bookmarks/${bookmarkId}`)
+        .set("Authorization",auth)
+        .send({nonsense: "This is nonsense"})
+        .expect(400);
       });
 
       it(`DELETE responds with 204 and removes the bookmark`, () => {
@@ -146,12 +178,12 @@ describe("Bookmarks-server", () => {
           (bookmark) => bookmark.id != idToRemove
         );
         return supertest(app)
-          .delete(`/bookmarks/${idToRemove}`)
+          .delete(`/api/bookmarks/${idToRemove}`)
           .set("Authorization", auth)
           .expect(204)
           .then(() => {
             return supertest(app)
-              .get(`/bookmarks`)
+              .get(`/api/bookmarks`)
               .set("Authorization", auth)
               .expect(expectedBookmarks);
           });
@@ -174,7 +206,7 @@ describe("Bookmarks-server", () => {
       });
       it(`removes XSS attack content`, () => {
         return supertest(app)
-          .get(`/bookmarks/${maliciousArticle.id}`)
+          .get(`/api/bookmarks/${maliciousArticle.id}`)
           .set("Authorization", auth)
           .expect(200)
           .expect((res) => {
